@@ -1,0 +1,5 @@
+seq	Cufflinks	transcript	1	100	1000	+	.	gene_id "CUFF.1"; transcript_id "CUFF.1.1";
+seq	Cufflinks	exon	1	100	1000	+	.	gene_id "CUFF.1"; transcript_id "CUFF.1.1";
+seq2	Cufflinks	transcript	1	200	2000	+	.	gene_id "CUFF.2"; transcript_id "CUFF.2.1";
+seq2	Cufflinks	exon	150	200	2000	+	.	gene_id "CUFF.2"; transcript_id "CUFF.2.1";
+seq2	Cufflinks	exon	1	100	2000	+	.	gene_id "CUFF.2"; transcript_id "CUFF.2.1";

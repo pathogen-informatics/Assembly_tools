@@ -1,0 +1,15 @@
+@HD	VN:1.0	SO:unsorted
+@SQ	SN:ref1	LN:100
+@SQ	SN:ref2	LN:110
+seq1:1-1.left	0	ref2	3	1	3M	*	0	0	GTA	III
+seq1:1-1.right	0	ref1	8	1	3M	*	0	0	AAA	III
+seq1:6-6.left	0	ref2	3	1	3M	*	0	0	GTA	III
+seq1:6-6.left	256	ref1	3	1	3M	*	0	0	GTA	III
+seq1:6-6.right	0	ref1	8	1	3M	*	0	0	AAA	III
+seq1:6-6.right	256	ref2	7	1	3M	*	0	0	AAA	III
+seq1:13-14.left	0	ref1	10	255	3M	*	0	0	ATG	III
+seq1:13-14.right	16	ref2	1	1	3M	*	0	0	ACG	III
+seq1:13-14.right	272	ref1	1	1	3M	*	0	0	ACG	III
+seq1:9-9.left	0	ref2	3	1	3M	*	0	0	GTA	III
+seq1:9-9.left	256	ref1	3	1	3M	*	0	0	GTA	III
+seq1:9-9.right	0	ref1	8	1	3M	*	0	0	AAA	III

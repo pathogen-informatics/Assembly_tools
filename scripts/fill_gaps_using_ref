@@ -1,0 +1,89 @@
+#!/usr/bin/env python3
+
+import argparse
+import sys
+import os
+import fastaq
+import assembly_tools.fill_gaps_using_reference.helper as helper
+
+parser = argparse.ArgumentParser(
+    description = 'Fills gaps in an assembly using sequences from a second "reference" assembly. Does this by maping flanking sequence either side of each gap to the reference.',
+    usage = '%(prog)s [options] <to_be_gap_filled.fasta[.gz]> <reference.fasta[.gz]> <out.gapfilled.fasta[.gz]>',
+    epilog = 'IMPORTANT: assumes that bowtie2 is in your path')
+parser.add_argument('--flanking_bases', type=int, help='Use this many bases either side of each gap [%(default)s]', default=400, metavar='INT')
+parser.add_argument('--logfile', action='store_true', help='Write a log file of gaps and what happened to them')
+parser.add_argument('to_be_gap_filled', help='Fasta file that has gaps to be filled')
+parser.add_argument('reference', help='Fasta file with data to be used to fill gaps')
+parser.add_argument('outfile', help='Name of output fasta with gaps filled')
+options = parser.parse_args()
+
+gap_flanks_fasta = options.outfile + '.tmp.seqs_flanking_gaps.fa.gz'
+bowtie2_index = options.outfile + '.tmp.bowtie_index'
+bowtie2_samfile = options.outfile + '.tmp.bowtie.sam'
+
+gaps = {}
+helper.make_fasta_of_gap_flanks(options.to_be_gap_filled, options.flanking_bases, gap_flanks_fasta, gaps)
+fastaq.utils.syscall(' '.join(['bowtie2-build', options.reference, bowtie2_index]))
+fastaq.utils.syscall(' '.join([
+    'bowtie2',
+    '-f',
+    '-x', bowtie2_index,
+    '-U', gap_flanks_fasta,
+    '-S', bowtie2_samfile,
+    '-k', '2'
+]))
+helper.parse_sam_file(bowtie2_samfile, gaps)
+ref_seqs = {}
+fastaq.tasks.file_to_dict(options.reference, ref_seqs)
+ref_gaps_to_be_filled = {}
+
+# Fill the gaps. Changing a sequence affecs downstream coords, so
+# begin filling from the end, not the start
+reader = fastaq.sequences.file_reader(options.to_be_gap_filled)
+fout_seqs = fastaq.utils.open_file_write(options.outfile)
+counts = {x:0 for x in ['closed', 'total']}
+
+if options.logfile:
+    fout_log = fastaq.utils.open_file_write(options.outfile + '.log')
+    print('#closed', 'name', 'gap_Start', 'gap_end', 'replace_start', 'replace_end',
+           'ref_name', 'ref_start', 'ref_end', 'reverse', 'type', sep='\t', file=fout_log)
+
+for seq in reader:
+    if seq.id in gaps:
+        for gap_coords in sorted(gaps[seq.id], reverse=True):
+            gap = gaps[seq.id][gap_coords]
+            counts['total'] += 1
+
+            if gap.can_be_filled(abs_diff=500):
+                new_seq = fastaq.sequences.Fasta('x', ref_seqs[gap.ref_name][gap.ref_start:gap.ref_end+1])
+                if gap.reverse_hit:
+                    new_seq.revcomp()
+                
+                seq.replace_interval(gap.query_replace_start, gap.query_replace_end, new_seq.seq)
+                counts['closed'] += 1
+                if options.logfile:
+                    print('1', gap, sep='\t', file=fout_log)
+            else:
+                if options.logfile:
+                    print('0', gap, sep='\t', file=fout_log)
+
+    print(seq, file=fout_seqs)
+    
+fastaq.utils.close(fout_seqs)
+if options.logfile:
+    fastaq.utils.close(fout_log)
+    
+print('-------------------------------------------')
+print('Closed', counts['closed'], 'of', counts['total'], 'gaps')
+
+# clean up tmp files
+files_to_clean = [
+    gap_flanks_fasta,
+    bowtie2_samfile
+]
+
+bowtie2_index_exts = [x + '.bt2' for x in ['1','2','3','4','rev.1','rev.2']]
+files_to_clean += [bowtie2_index + '.' + x for x in bowtie2_index_exts]
+
+for f in files_to_clean:
+    os.unlink(f)

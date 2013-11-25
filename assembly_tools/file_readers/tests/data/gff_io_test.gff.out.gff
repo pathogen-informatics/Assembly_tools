@@ -1,0 +1,2 @@
+seq1	SOURCE1 	gene	3	7	.	.	.	ID=gene1;name=name1
+seq1	SOURCE2 	CDS	42	43	0.1	-	1	ID=CDS1;name=name2

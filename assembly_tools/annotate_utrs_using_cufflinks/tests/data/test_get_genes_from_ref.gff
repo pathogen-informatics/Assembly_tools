@@ -1,0 +1,8 @@
+seq	SOURCE	exon	92	100	.	+	.	ID=gene.1:exon:2;Parent=gene.1
+seq	SOURCE	mRNA	42	100	.	+	.	ID=gene.1;Parent=gene
+seq	SOURCE	gene	42	100	.	+	.	ID=gene
+seq	SOURCE	exon	42	62	.	+	.	ID=gene.1:exon:1;Parent=gene.1
+seq	SOURCE	eggs	150	200	.	+	.	ID=spam
+seq2	SOURCE	gene	1	10	.	+	.	ID=gene2
+seq2	SOURCE	mRNA	1	10	.	+	.	ID=gene2.1;Parent=gene2
+seq2	SOURCE	exon	1	10	.	+	.	ID=gene2.1:exon:1;Parent=gene2.1
