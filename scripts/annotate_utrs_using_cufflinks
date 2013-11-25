@@ -1,0 +1,67 @@
+#!/usr/bin/env python3
+
+import argparse
+import sys
+import os
+from fastaq import utils
+from assembly_tools import annotate_utrs_using_cufflinks, file_readers
+
+parser = argparse.ArgumentParser(
+    description = 'Takes a reference GFF file and transcripts.gtf from Cufflinks. Outputs reference GFF with UTRs annotated based on Cufflinks output. Does not change any existing UTR annotations in the reference, only adds new ones.',
+    usage = '%(prog)s [options] <reference.gff[.gz]> <cufflinks transcripts.gtf[.gz]> <out.gff[.gz]>')
+parser.add_argument('ref_gff', help='GFF annotation file of reference. Assumes this is a GFF file with genes annotated using gene/mRNA/CDS format. See examples here: http://www.sequenceontology.org/gff3.shtml.', metavar='reference.gff')
+parser.add_argument('cufflinks_gtf', help='transcipts.gtf file made by cufflinks', metavar='transcripts.gtf')
+parser.add_argument('outfile', help='Name of output GFF file')
+options = parser.parse_args()
+
+
+file_readers.gff.lenient = True
+file_readers.gff.warnings = False
+annotate_utrs_using_cufflinks.gene.lenient = True
+annotate_utrs_using_cufflinks.transcript.lenient = True
+ref_genes, ref_other_gff = annotate_utrs_using_cufflinks.helper.load_ref_gff(options.ref_gff)
+cufflinks_genes = annotate_utrs_using_cufflinks.helper.load_cufflinks_gtf(options.cufflinks_gtf)
+
+f = utils.open_file_write(options.outfile)
+
+while len(ref_genes):
+    seqname, ref_gene_list = ref_genes.popitem()
+    to_print = []
+
+    if ref_gene_list is not None:
+        if seqname in cufflinks_genes and cufflinks_genes[seqname] is not None:
+            cufflinks_index = 0
+            cufflinks_list = cufflinks_genes[seqname]
+
+            
+            while len(ref_gene_list):
+                gene = ref_gene_list.pop(0)
+                indexes_can_use_to_extend = []
+
+                while cufflinks_index < len(cufflinks_list) and cufflinks_list[cufflinks_index].coords.end < gene.coords.start:
+                    cufflinks_index += 1
+           
+                original_index = cufflinks_index
+
+                while cufflinks_index < len(cufflinks_list) and cufflinks_list[cufflinks_index].intersects(gene):
+                    if gene.can_extend(cufflinks_list[cufflinks_index]):
+                        indexes_can_use_to_extend.append(cufflinks_index)
+                    cufflinks_index += 1
+                cufflinks_index = original_index
+
+                for x in indexes_can_use_to_extend:
+                    gene.extend(cufflinks_list[x])
+
+                to_print += gene.to_gff_list()
+
+            del cufflinks_genes[seqname]
+        else:
+            for gene in ref_gene_list:
+                to_print += gene.to_gff_list()
+
+    to_print += ref_other_gff.pop(seqname, [])
+    to_print.sort()
+    for g in to_print:
+        print(g, file=f)
+
+utils.close(f)

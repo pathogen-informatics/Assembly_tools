@@ -1,0 +1,4 @@
+seqname	SOURCE	mRNA	42	100	.	+	.	ID=id.1;Parent=id
+seqname	SOURCE	gene	42	100	.	+	.	ID=id
+seqname	SOURCE	exon	52	62	.	+	.	ID=id.1:exon:1;Parent=id.1
+seqname	SOURCE	eggs	150	200	.	+	.	ID=spam

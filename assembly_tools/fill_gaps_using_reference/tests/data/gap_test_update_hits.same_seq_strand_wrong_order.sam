@@ -1,0 +1,5 @@
+@HD	VN:1.0	SO:unsorted
+@SQ	SN:ref1	LN:100
+@SQ	SN:ref2	LN:110
+seq1:1-1.left	0	ref1	9	1	3M	*	0	0	GTA	III
+seq1:1-1.right	0	ref1	2	1	3M	*	0	0	AAA	III

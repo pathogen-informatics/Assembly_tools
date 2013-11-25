@@ -1,0 +1,2 @@
+seq1	Cufflinks 	transcript	1	42	.	.	.	key1 "val1"; key2 "val2";
+seq1	Cufflinks 	exon	1	2	.	.	.	key1 "val1"; key2 "val2";
