@@ -24,6 +24,7 @@ class Test_transcript(unittest.TestCase):
         self.gff_pseudogenic_transcript = gff.GFF_record('\t'.join(['seqname', 'SOURCE', 'pseudogenic_transcript', '42', '100', '.', '+', '.', 'ID=gene_id.1;Parent=gene_id']))
         self.gff_ncRNA = gff.GFF_record('\t'.join(['seqname', 'SOURCE', 'ncRNA', '42', '43', '.', '+', '.', 'ID=gene_id.1:ncRNA;Parent=gene_id.1']))
         self.gff_tRNA = gff.GFF_record('\t'.join(['seqname', 'SOURCE', 'tRNA', '42', '43', '.', '+', '.', 'ID=gene_id.1:tRNA;Parent=gene_id.1']))
+        self.gff_snRNA = gff.GFF_record('\t'.join(['seqname', 'SOURCE', 'snRNA', '42', '43', '.', '+', '.', 'ID=gene_id.1:snRNA;Parent=gene_id.1']))
         self.gff_rRNA = gff.GFF_record('\t'.join(['seqname', 'SOURCE', 'rRNA', '42', '43', '.', '+', '.', 'ID=gene_id.1:rRNA;Parent=gene_id.1']))
         self.gff_other = gff.GFF_record('\t'.join(['seqname', 'SOURCE', 'eggs', '42', '4242', '.', '+', '.']))
 
@@ -38,7 +39,7 @@ class Test_transcript(unittest.TestCase):
         self.assertEqual(self.trans.strand, strand)
         self.assertEqual(self.trans.seqname, seqname)
 
-        for l in [self.trans.five_utr, self.trans.three_utr, self.trans.exons, self.trans.ncRNA, self.trans.rRNA, self.trans.tRNA]:
+        for l in [self.trans.five_utr, self.trans.three_utr, self.trans.exons, self.trans.ncRNA, self.trans.rRNA, self.trans.tRNA, self.trans.snRNA]:
             self.assertEqual(len(l), 0)
 
         self.assertEqual(self.trans.mRNA, self.gff_mRNA)
@@ -84,6 +85,9 @@ class Test_transcript(unittest.TestCase):
         self.trans.add_gff_record(self.gff_tRNA)
         self.assertEqual(self.trans.tRNA, [self.gff_tRNA])
 
+        self.trans.add_gff_record(self.gff_snRNA)
+        self.assertEqual(self.trans.snRNA, [self.gff_snRNA])
+
         self.trans.add_gff_record(self.gff_rRNA)
         self.assertEqual(self.trans.rRNA, [self.gff_rRNA])
 
@@ -100,11 +104,11 @@ class Test_transcript(unittest.TestCase):
         sorted_list = list(unsorted_list)
         sorted_list.sort()
 
-        for l in [self.trans.five_utr, self.trans.three_utr, self.trans.exons, self.trans.ncRNA ,self.trans.rRNA, self.trans.tRNA]:
+        for l in [self.trans.five_utr, self.trans.three_utr, self.trans.exons, self.trans.ncRNA ,self.trans.rRNA, self.trans.tRNA, self.trans.snRNA]:
             l += unsorted_list
 
         self.trans._sort()
-        for l in [self.trans.five_utr, self.trans.three_utr, self.trans.exons, self.trans.ncRNA ,self.trans.rRNA, self.trans.tRNA]:
+        for l in [self.trans.five_utr, self.trans.three_utr, self.trans.exons, self.trans.ncRNA ,self.trans.rRNA, self.trans.tRNA, self.trans.snRNA]:
             self.assertEqual(sorted_list, l)
         
 
