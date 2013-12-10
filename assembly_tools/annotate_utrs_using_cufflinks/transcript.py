@@ -16,6 +16,7 @@ class Transcript:
         self.ncRNA = []
         self.rRNA = []
         self.tRNA = []
+        self.snRNA = []
         self.strand = None
         self.seqname = None
         self.other_gffs = []
@@ -47,6 +48,8 @@ class Transcript:
             self.rRNA.append(gff_record)
         elif gff_record.feature == 'tRNA':
             self.tRNA.append(gff_record)
+        elif gff_record.feature == 'snRNA':
+            self.snRNA.append(gff_record)
         else:
             self.other_gffs.append(gff_record)
 
@@ -56,13 +59,13 @@ class Transcript:
         self._sort()
         
     def _sort(self):
-        for l in [self.five_utr, self.three_utr, self.exons, self.ncRNA ,self.rRNA, self.tRNA, self.other_gffs]:
+        for l in [self.five_utr, self.three_utr, self.exons, self.ncRNA ,self.rRNA, self.tRNA, self.snRNA, self.other_gffs]:
             l.sort()
 
     def _set_coords(self):
         try:
-            start = min([t.coords.start for t in self.five_utr + self.three_utr + self.exons + self.ncRNA + self.rRNA + self.tRNA])
-            end = max([t.coords.end for t in self.five_utr + self.three_utr + self.exons + self.ncRNA + self.rRNA + self.tRNA])
+            start = min([t.coords.start for t in self.five_utr + self.three_utr + self.exons + self.ncRNA + self.rRNA + self.tRNA + self.snRNA])
+            end = max([t.coords.end for t in self.five_utr + self.three_utr + self.exons + self.ncRNA + self.rRNA + self.tRNA + self.snRNA])
         except:
             if self.mRNA is not None:
                 start = self.mRNA.coords.start
@@ -89,6 +92,7 @@ class Transcript:
             'ncRNA\n\t' + '\n\t'.join([str(x) for x in self.ncRNA]),
             'rRNA\n\t' + '\n\t'.join([str(x) for x in self.rRNA]),
             'tRNA\n\t' + '\n\t'.join([str(x) for x in self.tRNA]),
+            'snRNA\n\t' + '\n\t'.join([str(x) for x in self.snRNA]),
             'exons\n\t' + '\n\t'.join([str(x) for x in self.exons]),
             'other\n\t' + '\n\t'.join([str(x) for x in self.other_gffs])
         ]
@@ -96,7 +100,7 @@ class Transcript:
         return '\n'.join(a)
                    
     def _set_seqname(self):
-        names = set([g.seqname for g in self.five_utr + self.three_utr + self.exons + self.ncRNA + self.rRNA + self.tRNA + [self.mRNA] + self.other_gffs if g is not None])
+        names = set([g.seqname for g in self.five_utr + self.three_utr + self.exons + self.ncRNA + self.rRNA + self.tRNA + self.snRNA + [self.mRNA] + self.other_gffs if g is not None])
         if len(names) != 1:
             raise Error('Error getting seqname for transcript. Cannot continue')
              
@@ -110,7 +114,7 @@ class Transcript:
         return '*** Error getting strand info for transcript...\n' + str(self) + '\n***\n'
 
     def _set_strand(self):
-        strands = set([g.strand for g in self.five_utr + self.three_utr + self.exons + self.ncRNA + self.rRNA + self.tRNA + [self.mRNA] + self.other_gffs if g is not None])
+        strands = set([g.strand for g in self.five_utr + self.three_utr + self.exons + self.ncRNA + self.rRNA + self.tRNA + self.snRNA + [self.mRNA] + self.other_gffs if g is not None])
         if len(strands) != 1:
             if lenient:
                 self.strand = 'Inconsistent'
@@ -258,6 +262,6 @@ class Transcript:
 
 
     def to_gff_list(self):
-        l = [x for x in self.five_utr + self.three_utr + self.exons + [self.mRNA] + self.ncRNA + self.rRNA + self.tRNA + self.other_gffs if x is not None]
+        l = [x for x in self.five_utr + self.three_utr + self.exons + [self.mRNA] + self.ncRNA + self.rRNA + self.tRNA + self.snRNA + self.other_gffs if x is not None]
         l.sort()
         return l

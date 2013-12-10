@@ -8,7 +8,7 @@ class Error (Exception): pass
 
 feature_levels = [
     set(['gene', 'pseudogene']),
-    set(['mRNA', 'ncRNA', 'rRNA', 'tRNA', 'transcript', 'pseudogenic_transcript']),
+    set(['mRNA', 'ncRNA', 'rRNA', 'snRNA', 'tRNA', 'transcript', 'pseudogenic_transcript']),
     set(['five_prime_UTR', 'three_prime_UTR', 'CDS', 'exon', 'pseudogenic_exon'])
 ]
 
