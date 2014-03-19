@@ -32,10 +32,15 @@ while len(ref_genes):
         if seqname in cufflinks_genes and cufflinks_genes[seqname] is not None:
             cufflinks_index = 0
             cufflinks_list = cufflinks_genes[seqname]
-
+            previous_gene_coords = None
+            next_gene_coords = None
+             
             
             while len(ref_gene_list):
                 gene = ref_gene_list.pop(0)
+                if len(ref_gene_list):
+                    next_gene_coords = ref_gene_list[0].coords
+                exclude_coords = [x for x in [previous_gene_coords, next_gene_coords] if x is not None]
                 indexes_can_use_to_extend = []
 
                 while cufflinks_index < len(cufflinks_list) and cufflinks_list[cufflinks_index].coords.end < gene.coords.start:
@@ -50,10 +55,10 @@ while len(ref_genes):
                 cufflinks_index = original_index
 
                 for x in indexes_can_use_to_extend:
-                    gene.extend(cufflinks_list[x])
+                    gene.extend(cufflinks_list[x], exclude_coords=exclude_coords)
 
                 to_print += gene.to_gff_list()
-
+                previous_gene_coords = gene.coords
             del cufflinks_genes[seqname]
         else:
             for gene in ref_gene_list:

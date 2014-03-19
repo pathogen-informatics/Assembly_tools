@@ -318,6 +318,16 @@ class Test_transcript(unittest.TestCase):
         to_add[4].add_gff_record(new_left_exon2)
         to_add[4].add_gff_record(new_left_exon2)
 
+        # test adding a 5'UTR that overlaps an existing gene. Should do nothing
+        t = copy.deepcopy(before_adding[0])
+        t.update_utrs(to_add[0], exclude_coords = [intervals.Interval(10,31)])
+        self.assertEqual(t, before_adding[0])
+        
+        # test adding a 3'UTR that overlaps an existing gene. Should do nothing
+        t = copy.deepcopy(before_adding[2])
+        t.update_utrs(to_add[2], exclude_coords = [intervals.Interval(100,110)])
+        self.assertEqual(t, before_adding[2])
+
         for i in range(len(before_adding)):
             before_adding[i].update_utrs(to_add[i])
             self.assertEqual(before_adding[i], after_adding[i])
