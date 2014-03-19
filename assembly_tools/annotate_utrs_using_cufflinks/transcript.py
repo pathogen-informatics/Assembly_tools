@@ -138,9 +138,10 @@ class Transcript:
 
     def might_extend(self, other, min_extend=1):
         coords = intervals.Interval(self.coords.start - min_extend + 1, self.coords.end + min_extend - 1)
+        strands_ok = (self.strand == other.strand and self.strand not in ['.', 'Inconsistent']) \
+                     or (self.strand in ['-', '+'] and other.strand == '.' and len(self.exons) == len(other.exons) == 1)
         return self.seqname == other.seqname \
-             and self.strand == other.strand \
-             and self.strand not in ['.', 'Inconsistent'] \
+             and strands_ok \
              and len(self.exons) * len(other.exons) != 0 \
              and (coords.intersects(other.coords) or other.coords.end + 1 == coords.start or coords.end + 1 == other.coords.start) \
              and (other.coords.start < coords.start or coords.end < other.coords.end)
@@ -167,7 +168,7 @@ class Transcript:
     def number_of_common_splice_sites(self, other):
         return len(set(self.exon_splice_sites()).intersection(set(other.exon_splice_sites())))
 
-    def _add_utr_info(self, other, min_extend=1, max_new_utrs=3, extend_end=False):
+    def _add_utr_info(self, other, min_extend=1, max_new_utrs=3, extend_end=False, exclude_coords=[]):
         if (not extend_end and not self.can_extend_start(other, min_extend=min_extend)) \
           or (extend_end and not self.can_extend_end(other, min_extend=min_extend)):
             return
@@ -212,7 +213,13 @@ class Transcript:
             ]))
             new_gff.set_attribute('ID', self.exons[0].attributes['Parent'] + gff_id_suffix)
             new_gff.set_attribute('Parent', self.exons[0].attributes['Parent'])
-            new_utrs.append(new_gff)
+            intersects = False
+            for c in exclude_coords:
+                if new_gff.coords.intersects(c) or self.coords.intersects(c):
+                    intersects = True
+                    break
+            if not intersects:
+                new_utrs.append(new_gff)
             i = update_i(i)
 
         if len(new_utrs) > max_new_utrs:
@@ -238,9 +245,15 @@ class Transcript:
                     pass
 
                 if new_gff is not None:
-                    new_gff.set_attribute('ID', self.exons[0].attributes['Parent'] + gff_id_suffix)
-                    new_gff.set_attribute('Parent', self.exons[0].attributes['Parent'])
-                    new_utrs.append(new_gff)
+                    intersects = False
+                    for c in exclude_coords:
+                        if new_gff.coords.intersects(c) or self.coords.intersects(c):
+                            intersects = True
+                            break
+                    if not intersects:
+                        new_gff.set_attribute('ID', self.exons[0].attributes['Parent'] + gff_id_suffix)
+                        new_gff.set_attribute('Parent', self.exons[0].attributes['Parent'])
+                        new_utrs.append(new_gff)
 
         if len(new_utrs) > max_new_utrs:
             return
@@ -255,9 +268,9 @@ class Transcript:
             self.add_gff_record(utr)
 
 
-    def update_utrs(self, other, min_extend=1, max_new_utrs=3):
-        self._add_utr_info(other, min_extend=min_extend, max_new_utrs=max_new_utrs, extend_end=False)
-        self._add_utr_info(other, min_extend=min_extend, max_new_utrs=max_new_utrs, extend_end=True)
+    def update_utrs(self, other, min_extend=1, max_new_utrs=3, exclude_coords=[]):
+        self._add_utr_info(other, min_extend=min_extend, max_new_utrs=max_new_utrs, extend_end=False, exclude_coords=exclude_coords)
+        self._add_utr_info(other, min_extend=min_extend, max_new_utrs=max_new_utrs, extend_end=True, exclude_coords=exclude_coords)
         self._set_coords()
 
 

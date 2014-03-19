@@ -116,8 +116,8 @@ class Gene:
 
         return False
 
-    def extend(self, other, min_extend=1):
-        if (not self.can_extend(other)) or other.coords.start + min_extend >= self.coords.start:
+    def extend(self, other, min_extend=1, exclude_coords=[]):
+        if (not self.can_extend(other)) or (self.coords.start - other.coords.start < min_extend and other.coords.end - self.coords.end < min_extend):
             return
 
         for t in self.transcripts.values():
@@ -129,7 +129,7 @@ class Gene:
                    max_splices_in_common = splices
                    max_splices_key = key
            if max_splices_key is not None:
-               t.update_utrs(other.transcripts[max_splices_key])
+               t.update_utrs(other.transcripts[max_splices_key], exclude_coords=exclude_coords)
             
         self._set_coords()
 
