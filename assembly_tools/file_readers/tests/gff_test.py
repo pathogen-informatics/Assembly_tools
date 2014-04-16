@@ -62,6 +62,12 @@ class Test_GFF_record(unittest.TestCase):
         gff.lenient = False
 
 
+    def test_len(self):
+        '''Test __len__'''
+        g = gff.GFF_record('\t'.join(['seq', 'SOURCE', 'gene', '42', '44', '.', '.', '.']))
+        self.assertEqual(3, len(g))
+
+
     def test_less_than(self):
         '''Test less than operator'''
         gff_1 = gff.GFF_record('\t'.join(['seq', 'SOURCE', 'gene', '42', '44', '.', '.', '.']))
