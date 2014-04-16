@@ -123,6 +123,16 @@ class Test_transcript(unittest.TestCase):
         self.trans._set_coords()
         self.assertEqual(self.trans.coords, intervals.Interval(44, 53))
         
+
+    def test_total_exon_length(self):
+        '''Test total_exon_length'''
+        self.assertEqual(self.trans.total_exon_length(), 0)
+        self.trans.add_gff_record(self.gff_exon)
+        self.assertEqual(self.trans.total_exon_length(), 10)
+        self.trans.add_gff_record(self.gff_exon2)
+        self.assertEqual(self.trans.total_exon_length(), 14)
+
+
     def test_set_seqname(self):
         '''Test get_seqname'''
         self.trans.seqname = None

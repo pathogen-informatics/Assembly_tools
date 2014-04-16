@@ -99,6 +99,11 @@ class Transcript:
 
         return '\n'.join(a)
                    
+    def total_exon_length(self):
+        return sum([len(x) for x in self.exons])
+      
+            
+
     def _set_seqname(self):
         names = set([g.seqname for g in self.five_utr + self.three_utr + self.exons + self.ncRNA + self.rRNA + self.tRNA + self.snRNA + [self.mRNA] + self.other_gffs if g is not None])
         if len(names) != 1:
