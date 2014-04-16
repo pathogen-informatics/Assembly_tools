@@ -113,6 +113,14 @@ class Gene:
        
         return longest_name
 
+    def remove_all_but_longest_transcript(self):
+        longest_transcript = self.longest_transcript_by_exon_length()
+        if longest_transcript is not None:
+            to_remove = [t for t in self.transcripts if t != longest_transcript]
+            for t in to_remove:
+                del self.transcripts[t]
+            self._set_coords()
+
     def intersects(self, other):
        return self.seqname == other.seqname and self.coords.intersects(other.coords)
 
