@@ -9,7 +9,7 @@ class Error (Exception): pass
 feature_levels = [
     set(['gene', 'pseudogene']),
     set(['mRNA', 'ncRNA', 'rRNA', 'snRNA', 'tRNA', 'transcript', 'pseudogenic_transcript']),
-    set(['five_prime_UTR', 'three_prime_UTR', 'CDS', 'exon', 'pseudogenic_exon'])
+    set(['five_prime_UTR', 'three_prime_UTR', 'CDS', 'exon', 'pseudogenic_exon', 'polypeptide'])
 ]
 
 
@@ -87,7 +87,10 @@ class Gene:
                     raise Error('gene ID of the following line is not ' + str(self.gene_id) + '\n' + str(gff_record))
             elif gff_record.feature in feature_levels[2]:
                 if not gff_record.is_gtf:
-                    transcript_id = gff_record.get_attribute('Parent')
+                    if gff_record.feature == 'polypeptide':
+                        transcript_id = gff_record.get_attribute('Derives_from')
+                    else:
+                        transcript_id = gff_record.get_attribute('Parent')
             else:
                 raise Error('Error adding this line to gene information:\n' + str(gff_record))
 

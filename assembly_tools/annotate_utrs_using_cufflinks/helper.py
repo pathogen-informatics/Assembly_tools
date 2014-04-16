@@ -62,7 +62,10 @@ def get_genes_from_ref(level_records, other_records):
     # add the exon/CDSs to each gene
     while len(level_records[2]):
         g = level_records[2].pop()
-        parent_id = g.get_attribute('Parent')
+        if g.feature ==  'polypeptide':
+            parent_id = g.get_attribute('Derives_from')
+        else:
+            parent_id = g.get_attribute('Parent')
 
         try:
             gene_id = level2_to_level1[parent_id]
