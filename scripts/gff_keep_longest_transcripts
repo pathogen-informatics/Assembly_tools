@@ -1,0 +1,37 @@
+#!/usr/bin/env python3
+
+import assembly_tools
+import argparse
+from fastaq import utils
+
+parser = argparse.ArgumentParser(
+    description = 'Filters transcripts from GFF file, so only longest transcript for each gene is kept',
+    usage = '%(prog)s in.gff[.gz] out.gff[.gz]')
+parser.add_argument('gff_in', help='Name of input gff file', metavar='in.gff[.gz]')
+parser.add_argument('gff_out', help='Name of output gff file', metavar='out.gff[.gz]')
+options = parser.parse_args()
+
+
+assembly_tools.file_readers.gff.lenient = True
+assembly_tools.file_readers.gff.warnings = False
+assembly_tools.annotate_utrs_using_cufflinks.gene.lenient = True
+assembly_tools.annotate_utrs_using_cufflinks.transcript.lenient = True
+ref_genes, ref_other_gff = assembly_tools.annotate_utrs_using_cufflinks.helper.load_ref_gff(options.gff_in)
+f = utils.open_file_write(options.gff_out)
+
+while len(ref_genes):
+    seqname, ref_gene_list = ref_genes.popitem()
+    to_print = []
+
+    while len(ref_gene_list):
+        gene = ref_gene_list.pop(0)
+        gene.remove_all_but_longest_transcript()
+        to_print += gene.to_gff_list()
+
+    to_print += ref_other_gff.pop(seqname, [])
+    to_print.sort()
+    for g in to_print:
+        print(g, file=f)
+
+utils.close(f)
+

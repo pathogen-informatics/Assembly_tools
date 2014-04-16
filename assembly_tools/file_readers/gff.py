@@ -107,6 +107,8 @@ class GFF_record:
             else:
                 return s + '\t' + ';'.join(atts)
 
+    def __len__(self):
+        return len(self.coords)
 
     def __lt__(self, other):
         return self.seqname == other.seqname and self.coords < other.coords

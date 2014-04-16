@@ -49,6 +49,27 @@ class Test_gene(unittest.TestCase):
         self.gene._set_coords()
         self.assertEqual(self.gene.coords, self.gff_exon1.coords)
         
+    def test_longest_transcript_by_exon_length(self):
+        '''Test longest_transcript_by_exon_length'''
+        self.assertEqual('gene_id.1', self.gene.longest_transcript_by_exon_length())
+        gff_mRNA2 = gff.GFF_record('\t'.join(['seqname', 'SOURCE', 'mRNA', '42', '100', '.', '+', '.', 'ID=gene_id.2;Parent=gene_id']))
+        gff_exon2 = gff.GFF_record('\t'.join(['seqname', 'SOURCE', 'exon', '50', '65', '.', '+', '.', 'ID=gene_id.2:exon:1;Parent=gene_id.2']))
+        self.gene.add_gff_record(gff_mRNA2)
+        self.gene.add_gff_record(gff_exon2)
+        self.assertEqual('gene_id.2', self.gene.longest_transcript_by_exon_length())
+
+
+    def test_remove_all_but_longest_transcript(self):
+        '''Test remove_all_but_longest_transcript'''
+        self.gene.remove_all_but_longest_transcript()
+        self.assertEqual(['gene_id.1'], list(self.gene.transcripts.keys()))
+        gff_mRNA2 = gff.GFF_record('\t'.join(['seqname', 'SOURCE', 'mRNA', '42', '100', '.', '+', '.', 'ID=gene_id.2;Parent=gene_id']))
+        gff_exon2 = gff.GFF_record('\t'.join(['seqname', 'SOURCE', 'exon', '50', '65', '.', '+', '.', 'ID=gene_id.2:exon:1;Parent=gene_id.2']))
+        self.gene.add_gff_record(gff_mRNA2)
+        self.gene.add_gff_record(gff_exon2)
+        self.gene.remove_all_but_longest_transcript()
+        self.assertEqual(['gene_id.2'], list(self.gene.transcripts.keys()))
+
 
     def test_lt(self):
         gene2 = copy.deepcopy(self.gene)

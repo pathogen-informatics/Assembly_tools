@@ -21,6 +21,7 @@ class Test_transcript(unittest.TestCase):
         self.gff_exon3 = gff.GFF_record('\t'.join(['seqname', 'SOURCE', 'exon', '90', '94', '.', '+', '.', 'ID=gene_id.1:exon:2;Parent=gene_id.1']))
         self.gff_pseudogenic_exon = gff.GFF_record('\t'.join(['seqname', 'SOURCE', 'pseudogenic_exon', '60', '63', '.', '+', '.', 'ID=gene_id.1:exon:3;Parent=gene_id.1']))
         self.gff_transcript = gff.GFF_record('\t'.join(['seqname', 'SOURCE', 'transcript', '42', '100', '.', '+', '.', 'ID=gene_id.1;Parent=gene_id']))
+        self.gff_polypeptide = gff.GFF_record('\t'.join(['seqname', 'SOURCE', 'polypeptide', '42', '100', '.', '+', '.', 'ID=gene_id.1:pep;Derives_from=gene_id.1;translation=abcdefghjiklmnopwhatisyourfavouritecolourqrstuvwxyz']))
         self.gff_pseudogenic_transcript = gff.GFF_record('\t'.join(['seqname', 'SOURCE', 'pseudogenic_transcript', '42', '100', '.', '+', '.', 'ID=gene_id.1;Parent=gene_id']))
         self.gff_ncRNA = gff.GFF_record('\t'.join(['seqname', 'SOURCE', 'ncRNA', '42', '43', '.', '+', '.', 'ID=gene_id.1:ncRNA;Parent=gene_id.1']))
         self.gff_tRNA = gff.GFF_record('\t'.join(['seqname', 'SOURCE', 'tRNA', '42', '43', '.', '+', '.', 'ID=gene_id.1:tRNA;Parent=gene_id.1']))
@@ -123,6 +124,16 @@ class Test_transcript(unittest.TestCase):
         self.trans._set_coords()
         self.assertEqual(self.trans.coords, intervals.Interval(44, 53))
         
+
+    def test_total_exon_length(self):
+        '''Test total_exon_length'''
+        self.assertEqual(self.trans.total_exon_length(), 0)
+        self.trans.add_gff_record(self.gff_exon)
+        self.assertEqual(self.trans.total_exon_length(), 10)
+        self.trans.add_gff_record(self.gff_exon2)
+        self.assertEqual(self.trans.total_exon_length(), 14)
+
+
     def test_set_seqname(self):
         '''Test get_seqname'''
         self.trans.seqname = None

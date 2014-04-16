@@ -17,6 +17,7 @@ class Transcript:
         self.rRNA = []
         self.tRNA = []
         self.snRNA = []
+        self.polypeptide = None
         self.strand = None
         self.seqname = None
         self.other_gffs = []
@@ -50,6 +51,15 @@ class Transcript:
             self.tRNA.append(gff_record)
         elif gff_record.feature == 'snRNA':
             self.snRNA.append(gff_record)
+        elif gff_record.feature == 'polypeptide':
+            if self.polypeptide is not None:
+                raise Error('\n'.join([
+                    "Transcript already has this polypeptide:",
+                    str(self.polypeptide),
+                    "Cannot add this one as well:",
+                    str(gff_record)
+                ]))
+            self.polypeptide = gff_record
         else:
             self.other_gffs.append(gff_record)
 
@@ -73,11 +83,6 @@ class Transcript:
             else:
                 return
 
-        #if self.coords is None:
-        #    self.coords = intervals.Interval(start, end)
-        #else:
-        #    self.coords = self.coords.union(intervals.Interval(start, end))
-
         self.coords = intervals.Interval(start, end)
         if self.mRNA is not None:
             self.mRNA.coords = self.coords
@@ -94,11 +99,17 @@ class Transcript:
             'tRNA\n\t' + '\n\t'.join([str(x) for x in self.tRNA]),
             'snRNA\n\t' + '\n\t'.join([str(x) for x in self.snRNA]),
             'exons\n\t' + '\n\t'.join([str(x) for x in self.exons]),
+            'polypeptide\n\t' + str(self.polypeptide),
             'other\n\t' + '\n\t'.join([str(x) for x in self.other_gffs])
         ]
 
         return '\n'.join(a)
                    
+    def total_exon_length(self):
+        return sum([len(x) for x in self.exons])
+      
+            
+
     def _set_seqname(self):
         names = set([g.seqname for g in self.five_utr + self.three_utr + self.exons + self.ncRNA + self.rRNA + self.tRNA + self.snRNA + [self.mRNA] + self.other_gffs if g is not None])
         if len(names) != 1:
@@ -275,6 +286,6 @@ class Transcript:
 
 
     def to_gff_list(self):
-        l = [x for x in self.five_utr + self.three_utr + self.exons + [self.mRNA] + self.ncRNA + self.rRNA + self.tRNA + self.snRNA + self.other_gffs if x is not None]
+        l = [x for x in self.five_utr + self.three_utr + self.exons + [self.mRNA] + self.ncRNA + self.rRNA + self.tRNA + self.snRNA + [self.polypeptide] + self.other_gffs if x is not None]
         l.sort()
         return l
