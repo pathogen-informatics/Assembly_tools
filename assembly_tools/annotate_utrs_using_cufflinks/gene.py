@@ -102,6 +102,17 @@ class Gene:
     def __lt__(self, other):
         return self.seqname == other.seqname and self.coords < other.coords
 
+    def longest_transcript_by_exon_length(self):
+        longest_name = None
+        longest_length = -1
+        for transcript_id in self.transcripts:
+            l = self.transcripts[transcript_id].total_exon_length()
+            if l > longest_length:
+                longest_length = l
+                longest_name = transcript_id
+       
+        return longest_name
+
     def intersects(self, other):
        return self.seqname == other.seqname and self.coords.intersects(other.coords)
 
