@@ -10,6 +10,7 @@ parser = argparse.ArgumentParser(
     description = 'Fills gaps in an assembly using sequences from a second "reference" assembly. Does this by maping flanking sequence either side of each gap to the reference.',
     usage = '%(prog)s [options] <to_be_gap_filled.fasta[.gz]> <reference.fasta[.gz]> <out.gapfilled.fasta[.gz]>',
     epilog = 'IMPORTANT: assumes that smalt is in your path')
+parser.add_argument('--gap_abs_diff', type=int, help='Max allowed difference in gap length [%(default)s]', default=500, metavar='INT')
 parser.add_argument('--flanking_bases', type=int, help='Use this many bases either side of each gap [%(default)s]', default=400, metavar='INT')
 parser.add_argument('--logfile', action='store_true', help='Write a log file of gaps and what happened to them')
 parser.add_argument('--smalt_k', type=int, help='kmer to use with smalt index [%(default)s]', default=13, metavar='INT')
@@ -69,7 +70,7 @@ for seq in reader:
             gap = gaps[seq.id][gap_coords]
             counts['total'] += 1
 
-            if gap.can_be_filled(abs_diff=500):
+            if gap.can_be_filled(abs_diff=options.gap_abs_diff):
                 new_seq = fastaq.sequences.Fasta('x', ref_seqs[gap.ref_name][gap.ref_start:gap.ref_end+1])
                 if gap.reverse_hit:
                     new_seq.revcomp()
