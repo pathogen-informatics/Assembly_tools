@@ -9,37 +9,52 @@ import assembly_tools.fill_gaps_using_reference.helper as helper
 parser = argparse.ArgumentParser(
     description = 'Fills gaps in an assembly using sequences from a second "reference" assembly. Does this by maping flanking sequence either side of each gap to the reference.',
     usage = '%(prog)s [options] <to_be_gap_filled.fasta[.gz]> <reference.fasta[.gz]> <out.gapfilled.fasta[.gz]>',
-    epilog = 'IMPORTANT: assumes that bowtie2 is in your path')
+    epilog = 'IMPORTANT: assumes that smalt is in your path')
 parser.add_argument('--flanking_bases', type=int, help='Use this many bases either side of each gap [%(default)s]', default=400, metavar='INT')
 parser.add_argument('--logfile', action='store_true', help='Write a log file of gaps and what happened to them')
+parser.add_argument('--smalt_k', type=int, help='kmer to use with smalt index [%(default)s]', default=13, metavar='INT')
+parser.add_argument('--smalt_s', type=int, help='step to use with smalt index [%(default)s]', default=2, metavar='INT')
+parser.add_argument('--smalt_y', type=float, help='-y option with smalt map [%(default)s]', default=0.9, metavar='FLOAT')
+parser.add_argument('--smalt_r', type=int, help='-r option with smalt map [%(default)s]', default=-1, metavar='INT')
 parser.add_argument('to_be_gap_filled', help='Fasta file that has gaps to be filled')
 parser.add_argument('reference', help='Fasta file with data to be used to fill gaps')
 parser.add_argument('outfile', help='Name of output fasta with gaps filled')
 options = parser.parse_args()
 
 gap_flanks_fasta = options.outfile + '.tmp.seqs_flanking_gaps.fa.gz'
-bowtie2_index = options.outfile + '.tmp.bowtie_index'
-bowtie2_samfile = options.outfile + '.tmp.bowtie.sam'
+smalt_index = options.outfile + '.tmp.smalt_index'
+smalt_samfile = options.outfile + '.tmp.smalt.sam'
+
+# don't want any gaps at the start or end of contigs
+to_be_gap_filled_trimmed = options.outfile + '.tmp.to_be_filled.fa'
+fastaq.tasks.trim_Ns_at_end(options.to_be_gap_filled, to_be_gap_filled_trimmed)
 
 gaps = {}
-helper.make_fasta_of_gap_flanks(options.to_be_gap_filled, options.flanking_bases, gap_flanks_fasta, gaps)
-fastaq.utils.syscall(' '.join(['bowtie2-build', options.reference, bowtie2_index]))
+helper.make_fasta_of_gap_flanks(to_be_gap_filled_trimmed, options.flanking_bases, gap_flanks_fasta, gaps)
 fastaq.utils.syscall(' '.join([
-    'bowtie2',
-    '-f',
-    '-x', bowtie2_index,
-    '-U', gap_flanks_fasta,
-    '-S', bowtie2_samfile,
-    '-k', '2'
+    'smalt index',
+    '-k', str(options.smalt_k),
+    '-s', str(options.smalt_s),
+    smalt_index,
+    options.reference,
 ]))
-helper.parse_sam_file(bowtie2_samfile, gaps)
+fastaq.utils.syscall(' '.join([
+    'smalt map',
+    '-f sam',
+    '-o', smalt_samfile,
+    '-y', str(options.smalt_y),
+    '-r', str(options.smalt_r),
+    smalt_index,
+    gap_flanks_fasta,
+]))
+helper.parse_sam_file(smalt_samfile, gaps)
 ref_seqs = {}
 fastaq.tasks.file_to_dict(options.reference, ref_seqs)
 ref_gaps_to_be_filled = {}
 
 # Fill the gaps. Changing a sequence affecs downstream coords, so
 # begin filling from the end, not the start
-reader = fastaq.sequences.file_reader(options.to_be_gap_filled)
+reader = fastaq.sequences.file_reader(to_be_gap_filled_trimmed)
 fout_seqs = fastaq.utils.open_file_write(options.outfile)
 counts = {x:0 for x in ['closed', 'total']}
 
@@ -78,12 +93,13 @@ print('Closed', counts['closed'], 'of', counts['total'], 'gaps')
 
 # clean up tmp files
 files_to_clean = [
+    smalt_index + '.smi',
+    smalt_index + '.sma',
     gap_flanks_fasta,
-    bowtie2_samfile
+    smalt_samfile,
+    to_be_gap_filled_trimmed
 ]
 
-bowtie2_index_exts = [x + '.bt2' for x in ['1','2','3','4','rev.1','rev.2']]
-files_to_clean += [bowtie2_index + '.' + x for x in bowtie2_index_exts]
 
 for f in files_to_clean:
     os.unlink(f)
