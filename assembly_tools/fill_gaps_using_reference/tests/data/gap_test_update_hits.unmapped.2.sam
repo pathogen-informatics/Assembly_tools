@@ -2,4 +2,4 @@
 @SQ	SN:ref1	LN:100
 @SQ	SN:ref2	LN:110
 seq1:1-1.right	0	ref2	3	1	3M	*	0	0	GTA	III
-seq1:1-1.left	4	*	*	*	*	*	0	0	AAA	III
+seq1:1-1.left	4	*	0	0	*	*	0	0	AAA	III
