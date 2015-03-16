@@ -1,4 +1,4 @@
-from fastaq import utils, intervals
+from pyfastaq import utils, intervals
 import re
 import sys
 

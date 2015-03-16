@@ -7,7 +7,7 @@ import unittest
 import copy
 from assembly_tools.annotate_utrs_using_cufflinks import *
 from assembly_tools.file_readers import gff
-from fastaq import intervals
+from pyfastaq import intervals
 
 class Error (Exception): pass
 

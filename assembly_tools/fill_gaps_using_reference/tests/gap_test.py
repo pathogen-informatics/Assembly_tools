@@ -7,7 +7,7 @@ import unittest
 import copy
 import pysam
 import assembly_tools.fill_gaps_using_reference.gap as gap
-from fastaq import sequences
+from pyfastaq import sequences
 
 modules_dir = os.path.dirname(os.path.abspath(gap.__file__))
 data_dir = os.path.join(modules_dir, 'tests', 'data')

@@ -2,7 +2,7 @@
 
 import sys
 import pysam
-from fastaq import sequences
+from pyfastaq import sequences
 
 class Error (Exception): pass
 

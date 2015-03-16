@@ -2,7 +2,7 @@
 
 import assembly_tools
 import argparse
-from fastaq import utils
+from pyfastaq import utils
 
 parser = argparse.ArgumentParser(
     description = 'Filters transcripts from GFF file, so only longest transcript for each gene is kept',

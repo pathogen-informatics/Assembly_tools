@@ -1,7 +1,7 @@
 class Error (Exception): pass
 
 import sys
-from fastaq import *
+from pyfastaq import *
 from assembly_tools import file_readers
 from assembly_tools.annotate_utrs_using_cufflinks import gene
 
