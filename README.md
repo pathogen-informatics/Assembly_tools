@@ -8,7 +8,7 @@ Installation
 
 Prerequisites:
 
-  * [Fastaq] [Fastaq] >= v0.1
+  * [Fastaq] [Fastaq] >= v3.2.0
   * [Pysam] [Pysam]
   * [Bowtie2] [Bowtie2] (only required for some scripts)
 
