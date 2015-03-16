@@ -1,7 +1,7 @@
 import sys
 import copy
 from assembly_tools.annotate_utrs_using_cufflinks import transcript
-from fastaq import intervals
+from pyfastaq import intervals
 
 lenient = False
 class Error (Exception): pass

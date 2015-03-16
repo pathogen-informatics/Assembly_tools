@@ -5,7 +5,7 @@ import sys
 import os
 import pysam
 import re
-from fastaq import *
+from pyfastaq import *
 import assembly_tools.fill_gaps_using_reference
 
 

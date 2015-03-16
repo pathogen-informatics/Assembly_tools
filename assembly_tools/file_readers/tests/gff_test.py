@@ -5,7 +5,7 @@ import filecmp
 import os
 import unittest
 import assembly_tools.file_readers.gff as gff
-from fastaq import utils
+from pyfastaq import utils
 
 modules_dir = os.path.dirname(os.path.abspath(gff.__file__))
 data_dir = os.path.join(modules_dir, 'tests', 'data')

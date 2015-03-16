@@ -3,7 +3,7 @@
 import argparse
 import sys
 import os
-import fastaq
+import pyfastaq
 import assembly_tools.fill_gaps_using_reference.helper as helper
 
 parser = argparse.ArgumentParser(
@@ -28,18 +28,18 @@ smalt_samfile = options.outfile + '.tmp.smalt.sam'
 
 # don't want any gaps at the start or end of contigs
 to_be_gap_filled_trimmed = options.outfile + '.tmp.to_be_filled.fa'
-fastaq.tasks.trim_Ns_at_end(options.to_be_gap_filled, to_be_gap_filled_trimmed)
+pyfastaq.tasks.trim_Ns_at_end(options.to_be_gap_filled, to_be_gap_filled_trimmed)
 
 gaps = {}
 helper.make_fasta_of_gap_flanks(to_be_gap_filled_trimmed, options.flanking_bases, gap_flanks_fasta, gaps)
-fastaq.utils.syscall(' '.join([
+pyfastaq.utils.syscall(' '.join([
     'smalt index',
     '-k', str(options.smalt_k),
     '-s', str(options.smalt_s),
     smalt_index,
     options.reference,
 ]))
-fastaq.utils.syscall(' '.join([
+pyfastaq.utils.syscall(' '.join([
     'smalt map',
     '-f sam',
     '-o', smalt_samfile,
@@ -50,17 +50,17 @@ fastaq.utils.syscall(' '.join([
 ]))
 helper.parse_sam_file(smalt_samfile, gaps)
 ref_seqs = {}
-fastaq.tasks.file_to_dict(options.reference, ref_seqs)
+pyfastaq.tasks.file_to_dict(options.reference, ref_seqs)
 ref_gaps_to_be_filled = {}
 
 # Fill the gaps. Changing a sequence affecs downstream coords, so
 # begin filling from the end, not the start
-reader = fastaq.sequences.file_reader(to_be_gap_filled_trimmed)
-fout_seqs = fastaq.utils.open_file_write(options.outfile)
+reader = pyfastaq.sequences.file_reader(to_be_gap_filled_trimmed)
+fout_seqs = pyfastaq.utils.open_file_write(options.outfile)
 counts = {x:0 for x in ['closed', 'total']}
 
 if options.logfile:
-    fout_log = fastaq.utils.open_file_write(options.outfile + '.log')
+    fout_log = pyfastaq.utils.open_file_write(options.outfile + '.log')
     print('#closed', 'name', 'gap_Start', 'gap_end', 'replace_start', 'replace_end',
            'ref_name', 'ref_start', 'ref_end', 'reverse', 'type', sep='\t', file=fout_log)
 
@@ -71,7 +71,7 @@ for seq in reader:
             counts['total'] += 1
 
             if gap.can_be_filled(abs_diff=options.gap_abs_diff):
-                new_seq = fastaq.sequences.Fasta('x', ref_seqs[gap.ref_name][gap.ref_start:gap.ref_end+1])
+                new_seq = pyfastaq.sequences.Fasta('x', ref_seqs[gap.ref_name][gap.ref_start:gap.ref_end+1])
                 if gap.reverse_hit:
                     new_seq.revcomp()
                 
@@ -85,9 +85,9 @@ for seq in reader:
 
     print(seq, file=fout_seqs)
     
-fastaq.utils.close(fout_seqs)
+pyfastaq.utils.close(fout_seqs)
 if options.logfile:
-    fastaq.utils.close(fout_log)
+    pyfastaq.utils.close(fout_log)
     
 print('-------------------------------------------')
 print('Closed', counts['closed'], 'of', counts['total'], 'gaps')

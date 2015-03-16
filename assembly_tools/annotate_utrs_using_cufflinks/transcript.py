@@ -1,6 +1,6 @@
 import copy
 import sys
-from fastaq import intervals
+from pyfastaq import intervals
 from assembly_tools import file_readers
 
 lenient = False

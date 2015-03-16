@@ -3,7 +3,7 @@
 import argparse
 import sys
 import os
-from fastaq import utils
+from pyfastaq import utils
 from assembly_tools import annotate_utrs_using_cufflinks, file_readers
 
 parser = argparse.ArgumentParser(
