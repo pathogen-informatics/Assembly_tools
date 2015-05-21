@@ -30,7 +30,7 @@ class Test_gene(unittest.TestCase):
         self.gene.transcripts['gene_id.1'].seqname = 'something else'
         with self.assertRaises(gene.Error):
             self.gene._set_seqname()
-     
+
     def test_set_strand(self):
         self.gene.strand = None
         self.gene._set_strand(self.gff_mRNA)
@@ -38,7 +38,7 @@ class Test_gene(unittest.TestCase):
         self.gff_mRNA.strand = '-'
         with self.assertRaises(gene.Error):
             self.gene._set_strand(self.gff_mRNA)
-        
+
         gene.lenient = True
         self.gene._set_strand(self.gff_mRNA)
         self.assertTrue(self.gene.strand, 'Inconsistent')
@@ -48,7 +48,12 @@ class Test_gene(unittest.TestCase):
         self.gene.coords = None
         self.gene._set_coords()
         self.assertEqual(self.gene.coords, self.gff_exon1.coords)
-        
+
+    def test_set_coords_no_features(self):
+        test_gene = gene.Gene(self.gff_gene)
+        expected_coords = intervals.Interval(42, 100)
+        self.assertEqual(test_gene.coords, expected_coords)
+
     def test_longest_transcript_by_exon_length(self):
         '''Test longest_transcript_by_exon_length'''
         self.assertEqual('gene_id.1', self.gene.longest_transcript_by_exon_length())
@@ -85,8 +90,8 @@ class Test_gene(unittest.TestCase):
         gene2.coords.start = 1
         gene2.coords.end = 10
         self.assertTrue(gene2 < self.gene)
-       
-        
+
+
     def test_intersects(self):
         gene2 = copy.deepcopy(self.gene)
         gene2.seqname = 'seqname'
@@ -115,6 +120,4 @@ class Test_gene(unittest.TestCase):
         gene2 = copy.deepcopy(self.gene)
         gene2.add_gff_record(new_right_exon)
         self.assertTrue(self.gene.can_extend(gene2))
-      
-        
-      
+

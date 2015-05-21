@@ -34,7 +34,7 @@ class Gene:
                 names = set([self.gene_record.seqname])
             else:
                 raise Error('Error getting seqname for gene - too many names. Names: ' + str(names))
-             
+
         name = names.pop()
         if self.seqname is None:
             self.seqname = name
@@ -52,17 +52,20 @@ class Gene:
             if self.strand == None:
                 self.strand = gff_record.strand
 
+
     def _set_coords(self):
-        try:
+        if len(self.transcripts) > 0:
             start = min([t.coords.start for t in self.transcripts.values()])
             end = max([t.coords.end for t in self.transcripts.values()])
-        except:
-            return
-
-        self.coords = intervals.Interval(start, end)
+            self.coords = intervals.Interval(start, end)
+        elif self.gene_record is not None:
+            self.coords = self.gene_record.coords
+        else:
+            raise Error('Error setting coordinates for gene ' + self.gene_id + ' - cannot continue')
 
         if self.gene_record is not None:
             self.gene_record.coords = self.coords
+
 
     def add_gff_record(self, gff_record):
         gff_record = copy.deepcopy(gff_record)
@@ -81,7 +84,7 @@ class Gene:
                 if not gff_record.is_gtf:
                     transcript_id = gff_record.get_attribute('ID')
                     gene_id = gff_record.get_attribute('Parent')
-       
+
                 self.gene_id = self.gene_id if self.gene_id is not None else gene_id
                 if gene_id != self.gene_id:
                     raise Error('gene ID of the following line is not ' + str(self.gene_id) + '\n' + str(gff_record))
@@ -113,7 +116,7 @@ class Gene:
             if l > longest_length:
                 longest_length = l
                 longest_name = transcript_id
-       
+
         return longest_name
 
     def remove_all_but_longest_transcript(self):
@@ -152,7 +155,7 @@ class Gene:
                    max_splices_key = key
            if max_splices_key is not None:
                t.update_utrs(other.transcripts[max_splices_key], exclude_coords=exclude_coords)
-            
+
         self._set_coords()
 
     def __str__(self):
