@@ -7,7 +7,7 @@ def read(fname):
 
 setup(
     name='Assembly_tools',
-    version='0.1.1',
+    version='0.1.2',
     description='Scripts relating to genome assembly',
     long_description=read('README.md'),
     packages = find_packages(),

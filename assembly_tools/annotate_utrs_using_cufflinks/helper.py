@@ -83,6 +83,12 @@ def get_genes_from_ref(level_records, other_records):
 def load_ref_gff(filename):
     level_records, other_records = read_gff(filename)
     genes, other_records = get_genes_from_ref(level_records, other_records)
+
+    for refname in genes:
+        for test_gene in genes[refname].values():
+            if len(test_gene.transcripts) == 0:
+                print('WARNING:', test_gene.gene_id, 'has no transcripts', file=sys.stderr)
+
     sort_gene_dict_values(genes)
     return genes, other_records
 
